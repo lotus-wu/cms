@@ -44,8 +44,8 @@ CREATE TABLE `t_admuser` (
 -- ----------------------------
 -- Records of t_admuser
 -- ----------------------------
-INSERT INTO `t_admuser` VALUES ('1', 'admin', 'gaojianwen@hotmail.com', 'CrazyWolf', '1391387065', '研发', 'SddggEssSsmtsJgFUdFgInnFGsEfgBs2Sd==', '2016-08-27 15:05:11', '2016-09-03 10:56:45', '1');
-INSERT INTO `t_admuser` VALUES ('2', 'test', 'test@test.com', 'test', 'test', 'test', 'SddggEssSsmt1dDGdsdgsdGfdDgRdfgsDd==', '2016-09-03 03:02:28', '2016-09-04 14:57:20', '1');
+INSERT INTO `t_admuser` VALUES ('1', 'admin', 'gaojianwen@hotmail.com', 'CrazyWolf', '1391387065', '研发', 'bG90dXMta2luZ7yxX4IUebTVdyvQyoZsAK1fkm41gHIGWcyA05ydCYAq', '2016-08-27 15:05:11', '2016-09-03 10:56:45', '1');
+INSERT INTO `t_admuser` VALUES ('2', 'test', 'test@test.com', 'test', 'test', 'test', 'bG90dXMta2luZ7yxX4IUebTVdyvQyoZsAK1fkm41gHIGWcyA05ydCYAq', '2016-09-03 03:02:28', '2016-09-04 14:57:20', '1');
 
 -- ----------------------------
 -- Table structure for t_admusergroup
