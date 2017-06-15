@@ -80,7 +80,7 @@ func (this *AdmUserController) Addadmuser() {
 		}
 	}
 
-	password = common.EncodeMessageMd5(password)
+	password = common.EncodeMessageSHA256(password)
 
 	admuser := &model.Admuser{
 		Accout:     account,
@@ -151,7 +151,7 @@ func (this *AdmUserController) Modifyyadmuser() {
 	}
 
 	if len(password) != 0 {
-		password = common.EncodeMessageMd5(password)
+		password = common.EncodeMessageSHA256(password)
 	}
 
 	admuser := &model.Admuser{

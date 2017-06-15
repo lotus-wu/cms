@@ -25,8 +25,8 @@ func (this *LoginController) Tologin() {
 func (this *LoginController) Login() {
 	accout := this.GetString("accout")
 	password := this.GetString("password")
-	encodePwd := common.EncodeMessageMd5(password)
-
+	encodePwd := common.EncodeMessageSHA256(password)
+	beego.Info(encodePwd)
 	if admusers, err := service.AdmUserService.Authentication(accout, encodePwd); err != nil {
 		this.jsonResult(err.Error())
 	} else {

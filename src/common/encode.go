@@ -3,16 +3,16 @@ package common
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
+	"crypto/sha256"
 	"encoding/base64"
 
 	"github.com/astaxie/beego"
 )
 
-func EncodeMessageMd5(msg string) string {
-	h := md5.New()
-	coding := base64.NewEncoding(beego.AppConfig.String("base64key"))
-	h.Write([]byte(msg)) // 需要加密的字符串为 123456
+func EncodeMessageSHA256(msg string) string {
+	h := sha256.New()
+	coding := base64.StdEncoding
+	h.Write([]byte(msg)) // 需要加密的字符串为
 	key := []byte(beego.AppConfig.String("md5key"))
 	cipherStr := h.Sum([]byte(key))
 
@@ -20,7 +20,7 @@ func EncodeMessageMd5(msg string) string {
 }
 
 func getKey() []byte {
-	strKey := "zheshiyonggolangxiedeyigecmsxitongjichugongneng"
+	strKey := beego.AppConfig.String("aeskey")
 	keyLen := len(strKey)
 	if keyLen < 16 {
 		panic("res key 长度不能小于16")

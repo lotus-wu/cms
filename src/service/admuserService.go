@@ -3,6 +3,7 @@ package service
 import (
 	"cms/src/common"
 	"cms/src/model"
+	"crypto/subtle"
 	"strings"
 	"time"
 
@@ -186,7 +187,7 @@ func (this *admUserService) Authentication(accout, encodePwd string) (admuser *m
 		}
 		return nil, &common.BizError{"登陆失败，请稍后重试"}
 	}
-	if !strings.EqualFold(encodePwd, admuser.Password) {
+	if subtle.ConstantTimeCompare([]byte(encodePwd), []byte(admuser.Password)) != 1 {
 		return nil, &common.BizError{"密码错误"}
 	}
 	return admuser, nil
