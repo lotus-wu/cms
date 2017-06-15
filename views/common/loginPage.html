@@ -6,8 +6,9 @@
   <!--<meta http-equiv="refresh" content="0;url=/">-->
   <title>CMS 登陆</title>
   <link href="{{.staticUrl}}/css/style_log.css" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" type="text/css" href="{{.staticUrl}}/css/style.css">
-  <link rel="stylesheet" type="text/css" href="{{.staticUrl}}/css/userpanel.css">
+  <link rel="stylesheet" type="text/css" href="{{.staticUrl}}/js/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="{{.staticUrl}}/js/themes/default/icon.css">
+ 	<link rel="stylesheet" type="text/css" href="{{.staticUrl}}/js/themes/default/insdep_theme_default.css">
 
 </head>
 
@@ -24,10 +25,10 @@
         <div style="color:#FF0000" id="errmsg"></div>
         <h2>USERNAME</h2>
         <label>
-        <input type="text" name="accout" id="accout" class="txt_input txt_input2" onfocus="if (value ==&#39;Your accout&#39;){value =&#39;&#39;}" onblur="if (value ==&#39;&#39;){value=&#39;Your accout&#39;}" value="Your accout"></label>
+        <input type="text" name="accout" id="accout" class="txt_input txt_input2" ></label>
         <h2>PASSWORD</h2>
         <label>
-        <input type="password" name="password" id="password" class="txt_input" onfocus="if (value ==&#39;******&#39;){value =&#39;&#39;}" onblur="if (value ==&#39;&#39;){value=&#39;******&#39;}" value="******"></label>
+        <input type="password" name="password" id="password" class="txt_input"></label>
         <!--忘记密码-->
         <!--<p class="forgot">
       <a id="iforget" href="javascript:void(0);">Forgot your password?</a>
