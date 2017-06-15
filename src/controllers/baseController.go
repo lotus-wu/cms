@@ -28,7 +28,7 @@ type BaseController struct {
 测试开发的时候可以注释这个方法，方便测试
 */
 func (this *BaseController) Prepare() {
-	this.Ctx.Output.Header("Author", "CrazyWolf")
+	this.Ctx.Output.Header("Author", "lotus-wu")
 	this.Ctx.Output.Header("Access-Control-Allow-Origin", "")
 
 	//获取请求方法名称
