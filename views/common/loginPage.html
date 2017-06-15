@@ -8,9 +8,10 @@
   <link href="{{.staticUrl}}/css/style_log.css" rel="stylesheet" type="text/css">
   <link rel="stylesheet" type="text/css" href="{{.staticUrl}}/css/style.css">
   <link rel="stylesheet" type="text/css" href="{{.staticUrl}}/css/userpanel.css">
+
 </head>
 
-<body class="login" mycollectionplug="bind">
+<body class="login" mycollectionplug="bind" onkeydown="on_return();">
   <div class="login_m">
 
     <!--展示logo-->
@@ -67,7 +68,16 @@
     });
     
 }
+  //回车时，默认是登陆
+ function on_return(){
+	if(window.event.keyCode == 13){
+		if ($("#button")!=null){
+				$("#button").click();
+		}
+	}
+ }
 
+ 
 </script>
 <script type="text/javascript" src="{{.staticUrl}}/js/jquery/jquery.min.js"></script>
 
