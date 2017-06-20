@@ -56,7 +56,7 @@ function submitModifyAmdUserForm() {
     }
     ids = idArray.join(",")
 
-    url = "/admuser/modifyyadmuser"
+    url = "/admuser/modify"
     var data = {
         groupids: ids,
         userId:$("input[name='admUserId']").val(),

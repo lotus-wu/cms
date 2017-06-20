@@ -18,7 +18,7 @@ type AdmUserController struct {
 进入管理员列表页面
 */
 func (this *AdmUserController) List() {
-	this.show("admUser/admUserList.html")
+	this.show("admUser/list.html")
 }
 
 /**

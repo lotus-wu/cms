@@ -18,15 +18,15 @@ type admUserService struct{}
 /**
 分页查询管理员列表
 */
-func (this *admUserService) Gridlist(pager *common.Pager, admuserid, admusermail, admusername, admuserphone, accout string) (count int, admusers []model.Admuser) {
+func (this *admUserService) Gridlist(pager *common.Pager, admuserid, admusermail, admusername, admuserphone, account string) (count int, admusers []model.Admuser) {
 	countsql := "select count(1) from t_admuser t "
-	condition := genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, accout)
+	condition := genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, account)
 	if err := o.Raw(countsql + condition).QueryRow(&count); err != nil || count < 1 {
 		beego.Debug("select admuser count err or result is null.")
 		return
 	}
 
-	listsql := "select id,accout,mail,name,phone,department,password,createtime,updatetime,isdel from t_admuser t "
+	listsql := "select id,account,mail,name,phone,department,password,createtime,updatetime,isdel from t_admuser t "
 	if _, err := o.Raw(listsql+condition+common.LIMIT, pager.GetBegin(), pager.GetLen()).QueryRows(&admusers); err != nil {
 		beego.Warn("select admuserList from db error.")
 		return
@@ -37,7 +37,7 @@ func (this *admUserService) Gridlist(pager *common.Pager, admuserid, admusermail
 /**
 按照参数拼接sql查询条件
 */
-func genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, accout string) (condition string) {
+func genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, account string) (condition string) {
 	condition = " where t.isdel = 1 "
 	if !strings.EqualFold(admuserid, "") {
 		condition += " and t.id = " + admuserid + "'"
@@ -51,8 +51,8 @@ func genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, acco
 	if !strings.EqualFold(admuserphone, "") {
 		condition += " and t.phone =  '" + admuserphone + "'"
 	}
-	if !strings.EqualFold(accout, "") {
-		condition += " and t.accout =  '" + accout + "'"
+	if !strings.EqualFold(account, "") {
+		condition += " and t.account =  '" + account + "'"
 	}
 	beego.Debug("condition is : ", condition)
 	return
@@ -99,7 +99,6 @@ func (this *admUserService) ModifyAdmUser(admUser *model.Admuser, groupIds strin
 	set := updateSet(admUser)
 	condition := " where id = ? "
 
-	// if _, err := o.Raw(updateSql, admUser.Account, admUser.Mail, admUser.Name, admUser.Phone, admUser.Department, time.Now(), admUser.Id).Exec(); err != nil {
 	id := admUser.Id
 	if _, err := o.Raw(updateSql+set+condition, id).Exec(); err != nil {
 		beego.Warn("update admUser fail, admUser:", admUser, err.Error())
@@ -142,7 +141,7 @@ func updateSet(admUser *model.Admuser) string {
 		set += " password = '" + admUser.Password + "',"
 	}
 	if !strings.EqualFold(admUser.Account, "") {
-		set += " accout = '" + admUser.Account + "',"
+		set += " account = '" + admUser.Account + "',"
 	}
 	if !strings.EqualFold(admUser.Mail, "") {
 		set += " mail = '" + admUser.Mail + "',"
@@ -179,8 +178,8 @@ func (this *admUserService) Delete(userids string) error {
 /**
 登陆鉴权
 */
-func (this *admUserService) Authentication(accout, encodePwd string) (admuser *model.Admuser, err error) {
-	selectSql := "select id,password from t_admuser t where t.accout = '" + accout + "' and isdel =1"
+func (this *admUserService) Authentication(account, encodePwd string) (admuser *model.Admuser, err error) {
+	selectSql := "select id,password from t_admuser t where t.account = '" + account + "' and isdel =1"
 	if err := o.Raw(selectSql).QueryRow(&admuser); err != nil {
 		if err == orm.ErrNoRows {
 			return nil, &common.BizError{"账号不存在"}
