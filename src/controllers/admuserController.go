@@ -92,7 +92,7 @@ func (this *AdmUserController) Add() {
 	admuser.Updatetime = time.Now()
 	admuser.Isdel = 1
 
-	if err := service.AdmUserService.AddAdmUser(admuser, groupIds); err != nil {
+	if err := service.AdmUserService.Add(admuser, groupIds); err != nil {
 		this.jsonResult(err.Error())
 	}
 	this.jsonResult(SUCCESS)
@@ -159,7 +159,7 @@ func (this *AdmUserController) Modify() {
 	admuser.Updatetime = time.Now()
 	admuser.Isdel = 1
 
-	if err := service.AdmUserService.ModifyAdmUser(admuser, groupIds); err != nil {
+	if err := service.AdmUserService.Modify(admuser, groupIds); err != nil {
 		this.jsonResult(err.Error())
 	}
 	this.jsonResult(SUCCESS)

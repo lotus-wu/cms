@@ -17,7 +17,7 @@ type AdmUserGroupController struct {
 进入管理员组管理页面
 */
 func (this *AdmUserGroupController) List() {
-	this.show("admusergroup/admUserGroupList.html")
+	this.show("admusergroup/list.html")
 }
 
 /**
@@ -37,13 +37,13 @@ func (this *AdmUserGroupController) Gridlist() {
 进入添加页面
 */
 func (this *AdmUserGroupController) Toadd() {
-	this.show("admusergroup/addAdmusergroup.html")
+	this.show("admusergroup/add.html")
 }
 
 /**
 添加管理员组
 */
-func (this *AdmUserGroupController) Addadmusergroup() {
+func (this *AdmUserGroupController) Add() {
 	ids := this.GetString("ids")
 	groupname := this.GetString("groupname")
 	describe := this.GetString("describe")
@@ -83,13 +83,13 @@ func (this *AdmUserGroupController) Tomodify() {
 	id, _ := this.GetInt64("admusergroupid")
 	admusergroup := service.AdmUserGroupService.GetAdmUserGroupById(id)
 	this.Data["admusergroup"] = admusergroup
-	this.show("admusergroup/modifyAdmusergroup.html")
+	this.show("admusergroup/modify.html")
 }
 
 /**
 修改管理员组
 */
-func (this *AdmUserGroupController) Modifyadmusergroup() {
+func (this *AdmUserGroupController) Modify() {
 	ids := this.GetString("ids")
 	groupname := this.GetString("groupname")
 	describe := this.GetString("describe")

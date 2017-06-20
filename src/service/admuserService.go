@@ -61,7 +61,7 @@ func genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, acco
 /**
 添加管理员
 */
-func (this *admUserService) AddAdmUser(admUser *model.Admuser, groupIds string) error {
+func (this *admUserService) Add(admUser *model.Admuser, groupIds string) error {
 	flag := false
 	if admUserId, err := o.Insert(admUser); err != nil {
 		beego.Warn("insert admUser fail, admUser:", admUser, err.Error())
@@ -92,7 +92,7 @@ func (this *admUserService) AddAdmUser(admUser *model.Admuser, groupIds string) 
 /**
 修改管理员
 */
-func (this *admUserService) ModifyAdmUser(admUser *model.Admuser, groupIds string) error {
+func (this *admUserService) Modify(admUser *model.Admuser, groupIds string) error {
 	flag := false
 	updateSql := "UPDATE t_admuser SET "
 

@@ -12,25 +12,25 @@ var admusergroupsetting = {
     }
 };
 
-//初始化tree
+
+
+
+//初始化左边tree
 $(document).ready(loadTree());
 function loadTree() {
-    var admgroupuserid = $("input[name='admgroupuserid']").val()
-    url = "/admusergroup/loadtreechecked"
-    var data = {
-        admgroupuserid: admgroupuserid,
-    };
+    url = "/admusergroup/loadtreewithoutroot"
+    var data;
     $.post(url, data, function (result) {
         // zNodes = result
-        $.fn.zTree.init($("#modifyadmgrouproletree"), admusergroupsetting, result);
+        $.fn.zTree.init($("#addadmgrouproletree"), admusergroupsetting, result);
     });
 }
 
-/**
- * 修改管理员组
- */
-function submitModifyAmdUserGroupForm() {
-    var zTree = $.fn.zTree.getZTreeObj("modifyadmgrouproletree");
+
+
+function submitAddAmdUserGroupForm() {
+
+    var zTree = $.fn.zTree.getZTreeObj("addadmgrouproletree");
     nodes = zTree.getCheckedNodes(true);
     checkCount = nodes.length;
     //判断选中的节点数，如果没有选中节点则提示操作错误
@@ -45,28 +45,25 @@ function submitModifyAmdUserGroupForm() {
     }
     ids = idArray.join(",")
 
-    url = "/admusergroup/modifyadmusergroup"
+    url = "/admusergroup/add"
 
     var data = {
         ids: ids,
-        id: $("input[name='admgroupuserid']").val(),
-        groupname: $("input[name='ag_m_name']").val(),
-        describe: $("input[name='ag_m_describe']").val()
+        groupname: $("input[name='admgroupusername']").val(),
+        describe: $("input[name='admgroupuserdescribe']").val()
     };
 
     $.post(url, data, function (result) {
         if (result == "success") {
-            $('#modifyadmusergroup').window("close")
-            $.messager.alert('操作提示', "修改成功", 'info');
+            $('#addadmusergroup').window("close")
+            $.messager.alert('操作提示', "添加成功", 'info');
             loadAdmUserGroupDatagrid()
-        } else {
-            $.messager.alert('操作提示', result, 'info');
+        }else{
+             $.messager.alert('操作提示', result, 'info');
         }
     });
 }
 
-function clearModifyAmdUserGroupForm() {
-    $('#modifyadmusergroup').form('clear');
+function clearAddAmdUserGroupForm() {
+    $('#addamdusergroup').form('clear');
 }
-
-
