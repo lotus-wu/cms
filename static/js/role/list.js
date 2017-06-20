@@ -144,7 +144,7 @@ function deleteRole() {
     }
     ids = idArray.join(",")
 
-    url = "/role/deleterole"
+    url = "/role/delete"
     var data = { ids: ids };
 
     var pid = $("input[name='searchRolepid']").val()

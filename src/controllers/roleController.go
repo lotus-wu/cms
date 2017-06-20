@@ -17,7 +17,7 @@ type RoleController struct {
 进入分页展示页面
 */
 func (this *RoleController) List() {
-	this.show("role/roleList.html")
+	this.show("role/list.html")
 }
 
 /**
@@ -58,20 +58,20 @@ func (this *RoleController) Listtree() {
 进入添加权限页面
 */
 func (this *RoleController) Toadd() {
-	this.show("role/addRole.html")
+	this.show("role/add.html")
 }
 
 /**
 进入添加权限目录页面
 */
 func (this *RoleController) Toadddir() {
-	this.show("role/addRoleDir.html")
+	this.show("role/addDir.html")
 }
 
 /**
 添加权限
 */
-func (this *RoleController) Addrole() {
+func (this *RoleController) Add() {
 	pid, _ := this.GetInt64("pid")
 	name := this.GetString("name")
 	roleurl := this.GetString("roleurl")
@@ -122,7 +122,7 @@ func (this *RoleController) Tomodify() {
 	}
 	//this.jsonResult(role)
 	this.Data["role"] = role
-	this.show("role/modifyRole.html")
+	this.show("role/modify.html")
 }
 
 /**
@@ -172,7 +172,7 @@ func (this *RoleController) Modify() {
 /**
 删除权限
 */
-func (this *RoleController) Deleterole() {
+func (this *RoleController) Delete() {
 	ids := this.GetStrings("ids")
 
 	if err := service.RoleService.DeleteRole(ids); err != nil {
