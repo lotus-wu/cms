@@ -6,6 +6,7 @@ import (
 	"cms/src/service"
 	"time"
 
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
 )
 
@@ -40,36 +41,40 @@ func (this *AdmUserController) Gridlist() {
 进入添加页面
 */
 func (this *AdmUserController) Toaddadmuser() {
-	this.show("admUser/addAdmUser.html")
+	this.show("admUser/add.html")
 }
 
 /**
 添加管理员
 */
-func (this *AdmUserController) Addadmuser() {
-	account := this.GetString("account")
-	mail := this.GetString("mail")
-	name := this.GetString("name")
-	phone := this.GetString("phone")
-	department := this.GetString("department")
-	password := this.GetString("password")
+func (this *AdmUserController) Add() {
+
 	groupIds := this.GetString("ids")
 
+	beego.Info("==============================")
+	user := model.Admuser{}
+	err := this.ParseForm(&user)
+	if err != nil {
+		beego.Warn(err)
+	}
+	beego.Warn(user)
+	beego.Warn(this.Input())
+	beego.Info("==============================")
 	//参数校验
 	valid := validation.Validation{}
-	valid.Required(account, "账号").Message("不能为空")
-	valid.MaxSize(account, 20, "账号").Message("长度不能超过20个字符")
-	valid.Required(mail, "邮箱").Message("不能为空")
-	valid.MaxSize(mail, 50, "邮箱").Message("长度不能超过50个字符")
-	valid.Email(mail, "邮箱").Message("格式错误")
-	valid.Required(name, "姓名").Message("不能为空")
-	valid.MaxSize(name, 20, "姓名").Message("长度不能超过20个字符")
-	valid.Required(phone, "手机号码").Message("不能为空")
-	valid.MaxSize(phone, 15, "手机号码").Message("长度不能超过15个字符")
-	valid.Required(department, "部门").Message("不能为空")
-	valid.MaxSize(department, 20, "部门").Message("长度不能超过20个字符")
-	valid.Required(password, "密码").Message("不能为空")
-	valid.MaxSize(password, 20, "密码").Message("长度不能超过20个字符")
+	valid.Required(user.Account, "账号").Message("不能为空")
+	valid.MaxSize(user.Account, 20, "账号").Message("长度不能超过20个字符")
+	valid.Required(user.Mail, "邮箱").Message("不能为空")
+	valid.MaxSize(user.Mail, 50, "邮箱").Message("长度不能超过50个字符")
+	valid.Email(user.Mail, "邮箱").Message("格式错误")
+	valid.Required(user.Name, "姓名").Message("不能为空")
+	valid.MaxSize(user.Name, 20, "姓名").Message("长度不能超过20个字符")
+	valid.Required(user.Phone, "手机号码").Message("不能为空")
+	valid.MaxSize(user.Phone, 15, "手机号码").Message("长度不能超过15个字符")
+	valid.Required(user.Department, "部门").Message("不能为空")
+	valid.MaxSize(user.Department, 20, "部门").Message("长度不能超过20个字符")
+	valid.Required(user.Password, "密码").Message("不能为空")
+	valid.MaxSize(user.Password, 20, "密码").Message("长度不能超过20个字符")
 	valid.MinSize(groupIds, 1, "组信息").Message("请至少选择一个")
 
 	if valid.HasErrors() {
@@ -80,18 +85,13 @@ func (this *AdmUserController) Addadmuser() {
 		}
 	}
 
-	password = common.EncodeMessageSHA256(password)
+	user.Password = common.EncodeMessageSHA256(user.Password)
 
-	admuser := &model.Admuser{
-		Accout:     account,
-		Name:       name,
-		Mail:       mail,
-		Phone:      phone,
-		Department: department,
-		Password:   password,
-		Createtime: time.Now(),
-		Updatetime: time.Now(),
-		Isdel:      1}
+	admuser := &user
+	admuser.Createtime = time.Now()
+	admuser.Updatetime = time.Now()
+	admuser.Isdel = 1
+
 	if err := service.AdmUserService.AddAdmUser(admuser, groupIds); err != nil {
 		this.jsonResult(err.Error())
 	}
@@ -105,41 +105,40 @@ func (this *AdmUserController) Tomodifyadmuser() {
 	admUserId, _ := this.GetInt64("admUserId")
 	admUser, _ := service.AdmUserService.GetUserById(admUserId)
 	this.Data["admuser"] = admUser
-	this.show("admUser/modifyAdmUser.html")
+	this.show("admUser/modify.html")
 }
 
 /**
 修改管理员
 */
-func (this *AdmUserController) Modifyyadmuser() {
+func (this *AdmUserController) Modify() {
 	userId, _ := this.GetInt64("userId")
-	account := this.GetString("account")
-	mail := this.GetString("mail")
-	name := this.GetString("name")
-	phone := this.GetString("phone")
-	department := this.GetString("department")
-	password := this.GetString("password")
-	groupIds := this.GetString("groupids")
 
+	groupIds := this.GetString("groupids")
+	beego.Info("==============================")
+	user := model.Admuser{}
+	err := this.ParseForm(&user)
+	if err != nil {
+		beego.Warn(err)
+	}
+	beego.Warn(user)
+	beego.Warn(this.Input())
+	beego.Info("==============================")
 	//参数校验
 	valid := validation.Validation{}
-	valid.Required(account, "账号").Message("不能为空")
-	valid.MaxSize(account, 20, "账号").Message("长度不能超过20个字符")
-	valid.Required(mail, "邮箱").Message("不能为空")
-	valid.MaxSize(mail, 50, "邮箱").Message("长度不能超过50个字符")
-	valid.Email(mail, "邮箱").Message("格式错误")
-	valid.Required(name, "姓名").Message("不能为空")
-	valid.MaxSize(name, 20, "姓名").Message("长度不能超过20个字符")
-	valid.Required(phone, "手机号码").Message("不能为空")
-	valid.MaxSize(phone, 15, "手机号码").Message("长度不能超过15个字符")
-	valid.Required(department, "部门").Message("不能为空")
-	valid.MaxSize(department, 20, "部门").Message("长度不能超过20个字符")
-
-	if len(password) > 0 {
-		valid.Required(password, "密码").Message("不能为空")
-		valid.MaxSize(password, 20, "密码").Message("长度不能超过20个字符")
-	}
-
+	valid.Required(user.Account, "账号").Message("不能为空")
+	valid.MaxSize(user.Account, 20, "账号").Message("长度不能超过20个字符")
+	valid.Required(user.Mail, "邮箱").Message("不能为空")
+	valid.MaxSize(user.Mail, 50, "邮箱").Message("长度不能超过50个字符")
+	valid.Email(user.Mail, "邮箱").Message("格式错误")
+	valid.Required(user.Name, "姓名").Message("不能为空")
+	valid.MaxSize(user.Name, 20, "姓名").Message("长度不能超过20个字符")
+	valid.Required(user.Phone, "手机号码").Message("不能为空")
+	valid.MaxSize(user.Phone, 15, "手机号码").Message("长度不能超过15个字符")
+	valid.Required(user.Department, "部门").Message("不能为空")
+	valid.MaxSize(user.Department, 20, "部门").Message("长度不能超过20个字符")
+	valid.Required(user.Password, "密码").Message("不能为空")
+	valid.MaxSize(user.Password, 20, "密码").Message("长度不能超过20个字符")
 	valid.MinSize(groupIds, 1, "组信息").Message("请至少选择一个")
 
 	if valid.HasErrors() {
@@ -150,21 +149,15 @@ func (this *AdmUserController) Modifyyadmuser() {
 		}
 	}
 
-	if len(password) != 0 {
-		password = common.EncodeMessageSHA256(password)
+	if len(user.Password) != 0 {
+		user.Password = common.EncodeMessageSHA256(user.Password)
 	}
 
-	admuser := &model.Admuser{
-		Id:         userId,
-		Accout:     account,
-		Name:       name,
-		Mail:       mail,
-		Phone:      phone,
-		Department: department,
-		Password:   password,
-		Createtime: time.Now(),
-		Updatetime: time.Now(),
-		Isdel:      1}
+	admuser := &user
+	admuser.Id = userId
+	admuser.Createtime = time.Now()
+	admuser.Updatetime = time.Now()
+	admuser.Isdel = 1
 
 	if err := service.AdmUserService.ModifyAdmUser(admuser, groupIds); err != nil {
 		this.jsonResult(err.Error())

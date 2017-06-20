@@ -99,7 +99,7 @@ func (this *admUserService) ModifyAdmUser(admUser *model.Admuser, groupIds strin
 	set := updateSet(admUser)
 	condition := " where id = ? "
 
-	// if _, err := o.Raw(updateSql, admUser.Accout, admUser.Mail, admUser.Name, admUser.Phone, admUser.Department, time.Now(), admUser.Id).Exec(); err != nil {
+	// if _, err := o.Raw(updateSql, admUser.Account, admUser.Mail, admUser.Name, admUser.Phone, admUser.Department, time.Now(), admUser.Id).Exec(); err != nil {
 	id := admUser.Id
 	if _, err := o.Raw(updateSql+set+condition, id).Exec(); err != nil {
 		beego.Warn("update admUser fail, admUser:", admUser, err.Error())
@@ -141,8 +141,8 @@ func updateSet(admUser *model.Admuser) string {
 	if !strings.EqualFold(admUser.Password, "") {
 		set += " password = '" + admUser.Password + "',"
 	}
-	if !strings.EqualFold(admUser.Accout, "") {
-		set += " accout = '" + admUser.Accout + "',"
+	if !strings.EqualFold(admUser.Account, "") {
+		set += " accout = '" + admUser.Account + "',"
 	}
 	if !strings.EqualFold(admUser.Mail, "") {
 		set += " mail = '" + admUser.Mail + "',"

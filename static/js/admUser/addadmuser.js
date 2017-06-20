@@ -48,7 +48,7 @@ function submitAddAmdUserForm() {
     }
     ids = idArray.join(",")
 
-    url = "/admuser/addadmuser"
+    url = "/admuser/add"
     var data = {
         ids: ids,
         account: $("input[name='admUserAcout']").val(),

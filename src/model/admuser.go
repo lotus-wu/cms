@@ -4,7 +4,7 @@ import "time"
 
 type Admuser struct {
 	Id         int64     `json:"id"`
-	Accout     string    `json:"accout",orm:"unique"`
+	Account    string    `json:"account",orm:"unique"`
 	Mail       string    `json:"mail"`
 	Name       string    `json:"name"`
 	Phone      string    `json:"phone"`
