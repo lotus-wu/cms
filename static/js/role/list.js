@@ -131,31 +131,38 @@ function openModifyRoleWin(roleid) {
 function deleteRole() {
     var selections = $('#role_list').datagrid('getSelections')
     if (selections.length == 0) {
-        alert("请先选择要删除的列")
+         $.messager.alert("操作提示","请先选择要删除的记录")
         return false
     }
+	$(function () {  
+        $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {  
+            if (data) {  
+                 var idArray = new Array(selections.length)
+				for (var i = 0; i < selections.length; i++) {
+					idArray[i] = selections[i].id
+				}
+				ids = idArray.join(",")
 
-    if (!confirm("确定要删除选中的数据吗？")) {
-        return false
-    }
-    var idArray = new Array(selections.length)
-    for (var i = 0; i < selections.length; i++) {
-        idArray[i] = selections[i].id
-    }
-    ids = idArray.join(",")
+				url = "/role/delete"
+				var data = { ids: ids };
 
-    url = "/role/delete"
-    var data = { ids: ids };
+				var pid = $("input[name='searchRolepid']").val()
+				$.post(url, data, function (result) {
+					loadTree(pid)
+					loaddatagrid(pid)
+					selections.length = 0;
+					if (result == "success") {
+						$.messager.alert('操作提示', "删除成功", 'info');
+					} else {
+						$.messager.alert('操作提示', result, 'warning');
+					}
+				});
+            }  
+            else {  
+               
+            }  
+        });  
+    });  
 
-    var pid = $("input[name='searchRolepid']").val()
-    $.post(url, data, function (result) {
-        loadTree(pid)
-        loaddatagrid(pid)
-        selections.length = 0;
-        if (result == "success") {
-            $.messager.alert('操作提示', "删除成功", 'info');
-        } else {
-            $.messager.alert('操作提示', result, 'warning');
-        }
-    });
+
 }

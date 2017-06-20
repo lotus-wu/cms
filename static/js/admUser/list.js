@@ -68,39 +68,46 @@ function openModifyAdmUserWin(admUserId) {
     });
 }
 
-deleteAdmUser
+
 
 
 //删除方法
 function deleteAdmUser() {
     var selections = $('#admUser_list').datagrid('getSelections')
     if (selections.length == 0) {
-        alert("请先选择要删除的记录")
+         $.messager.alert("操作提示","请先选择要删除的记录")
         return false
     }
+	 $(function () {  
+	
+        $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {  
+            if (data) {  
+                var idArray = new Array(selections.length)
+				for (var i = 0; i < selections.length; i++) {
+					idArray[i] = selections[i].id
+				}
+				ids = idArray.join(",")
 
-    if (!confirm("确定要删除选中的数据吗？")) {
-        return false
-    }
-    var idArray = new Array(selections.length)
-    for (var i = 0; i < selections.length; i++) {
-        idArray[i] = selections[i].id
-    }
-    ids = idArray.join(",")
+				url = "/admuser/delete"
+				var data = { userids: ids };
 
-    url = "/admuser/delete"
-    var data = { userids: ids };
-
-    $.post(url, data, function (result) {
-        if (result == "success") {
-            loadModifyAdmUserGrid()
-            $.messager.alert('操作提示', "删除成功", 'info');
-            selections=0;
-        } else {
-            $.messager.alert('操作提示', result, 'warning');
-            selections=0;
-        }
-    });
+				$.post(url, data, function (result) {
+					if (result == "success") {
+						loadModifyAdmUserGrid()
+						$.messager.alert('操作提示', "删除成功", 'info');
+						selections=0;
+					} else {
+						$.messager.alert('操作提示', result, 'warning');
+						selections=0;
+					}
+				});
+            }  
+            else {  
+               
+            }  
+        });  
+    });  
+  
 }
 
 function loadModifyAdmUserGrid() {

@@ -16,7 +16,7 @@ function submitAddRoleForm() {
             clearAddRoleForm()
             loadTree(pid)
             loaddatagrid(pid)
-            $.messager.alert('操作提示', "添加成功", 'info');
+            $.messager.alert("操作提示", "添加成功", 'info');
         }
     });
 }
