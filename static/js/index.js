@@ -13,6 +13,7 @@ function addTab(title, url) {
     if ($('#mainTab').tabs('exists', title)) {
         $('#mainTab').tabs('select', title);
     } else {
+		$('#mainTab').tabs('close',1);
         //var content = '<iframe scrolling="auto" frameborder="0"  src="'+url+'" style="width:100%;height:100%;"></iframe>';
         $('#mainTab').tabs('add', {
             title: title,
