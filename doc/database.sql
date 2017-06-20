@@ -28,7 +28,7 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `t_admuser`;
 CREATE TABLE `t_admuser` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `accout` varchar(255) NOT NULL DEFAULT '',
+  `account` varchar(255) NOT NULL DEFAULT '',
   `mail` varchar(255) NOT NULL DEFAULT '',
   `name` varchar(255) NOT NULL DEFAULT '',
   `phone` varchar(255) NOT NULL DEFAULT '',
@@ -38,7 +38,7 @@ CREATE TABLE `t_admuser` (
   `updatetime` datetime NOT NULL,
   `isdel` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `admUserAcout` (`accout`)
+  UNIQUE KEY `admUserAcout` (`account`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
