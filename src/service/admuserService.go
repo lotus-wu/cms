@@ -5,12 +5,11 @@ import (
 	"cms/src/model"
 	"crypto/subtle"
 	"strings"
-	"time"
 
 	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
+	"github.com/go-xorm/xorm"
 )
 
 type admUserService struct{}
@@ -18,42 +17,63 @@ type admUserService struct{}
 /**
 分页查询管理员列表
 */
-func (this *admUserService) Gridlist(pager *common.Pager, admuserid, admusermail, admusername, admuserphone, account string) (count int, admusers []model.Admuser) {
-	countsql := "select count(1) from t_admuser t "
+func (this *admUserService) Gridlist(pager *common.Pager, admuserid, admusermail, admusername, admuserphone, account string) (int, []model.Admuser) {
+	var err error
+	var count int64
 	condition := genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, account)
-	if err := o.Raw(countsql + condition).QueryRow(&count); err != nil || count < 1 {
-		beego.Debug("select admuser count err or result is null.")
-		return
+	if count, err = o.Alias("t").Where(condition).Count(new(model.Admuser)); err != nil {
+		beego.Warn("Count failed:", err.Error())
+		return 0, nil
 	}
 
-	listsql := "select id,account,mail,name,phone,department,password,createtime,updatetime,isdel from t_admuser t "
-	if _, err := o.Raw(listsql+condition+common.LIMIT, pager.GetBegin(), pager.GetLen()).QueryRows(&admusers); err != nil {
-		beego.Warn("select admuserList from db error.")
-		return
+	datas := []model.Admuser{} //多个数据
+	if err := o.Alias("t").Where(condition).Limit(pager.GetLen(), pager.GetBegin()).Find(&datas); err != nil {
+		beego.Warn("find admin User failed:", err.Error())
+		return 0, nil
 	}
-	return
+
+	return int(count), datas
 }
 
 /**
 按照参数拼接sql查询条件
 */
 func genAdmUserCondition(admuserid, admusermail, admusername, admuserphone, account string) (condition string) {
-	condition = " where t.isdel = 1 "
+	andflag := false
+	andstr := " and "
 	if !strings.EqualFold(admuserid, "") {
-		condition += " and t.id = " + admuserid + "'"
+		condition += "   t.id = " + admuserid + "'"
+		andflag = true
 	}
 	if !strings.EqualFold(admusermail, "") {
+		if andflag == true {
+			condition += andstr
+		}
 		condition += " and t.mail = '" + admusermail + "'"
+		andflag = true
 	}
 	if !strings.EqualFold(admusername, "") {
+		if andflag == true {
+			condition += andstr
+		}
 		condition += " and t.name =  '" + admusername + "'"
+		andflag = true
 	}
 	if !strings.EqualFold(admuserphone, "") {
+		if andflag == true {
+			condition += andstr
+		}
 		condition += " and t.phone =  '" + admuserphone + "'"
+		andflag = true
 	}
 	if !strings.EqualFold(account, "") {
+		if andflag == true {
+			condition += andstr
+		}
 		condition += " and t.account =  '" + account + "'"
+		andflag = true
 	}
+
 	beego.Debug("condition is : ", condition)
 	return
 }
@@ -77,7 +97,7 @@ func (this *admUserService) Add(admUser *model.Admuser, groupIds string) error {
 			rel := model.UserGroupRel{
 				Userid:  admUserId,
 				Groupid: gidint,
-				Isdel:   1}
+			}
 			if _, err := o.Insert(&rel); err != nil {
 				flag = true
 			}
@@ -94,19 +114,13 @@ func (this *admUserService) Add(admUser *model.Admuser, groupIds string) error {
 */
 func (this *admUserService) Modify(admUser *model.Admuser, groupIds string) error {
 	flag := false
-	updateSql := "UPDATE t_admuser SET "
 
-	set := updateSet(admUser)
-	condition := " where id = ? "
-
-	id := admUser.Id
-	if _, err := o.Raw(updateSql+set+condition, id).Exec(); err != nil {
+	if _, err := o.Id(admUser.Id).Update(admUser); err != nil {
 		beego.Warn("update admUser fail, admUser:", admUser, err.Error())
 		return &common.BizError{"修改失败"}
 	} else {
 		//逻辑删除所有用户和组关联关系UserGroupRel
-		delRelSql := "update t_user_group_rel set isdel = 0 where userid = ?"
-		if _, err := o.Raw(delRelSql, admUser.Id).Exec(); err != nil {
+		if _, err := o.Where("userid = ?", admUser.Id).Delete(new(model.UserGroupRel)); err != nil {
 			return &common.BizError{"修改失败"}
 		}
 
@@ -120,8 +134,7 @@ func (this *admUserService) Modify(admUser *model.Admuser, groupIds string) erro
 			}
 			rel := model.UserGroupRel{
 				Userid:  admUser.Id,
-				Groupid: gidint,
-				Isdel:   1}
+				Groupid: gidint}
 			if _, err := o.Insert(&rel); err != nil {
 				beego.Warn("添加组关系失败", rel, err.Error())
 				flag = true
@@ -133,45 +146,21 @@ func (this *admUserService) Modify(admUser *model.Admuser, groupIds string) erro
 	}
 
 	return nil
-}
 
-func updateSet(admUser *model.Admuser) string {
-	set := ""
-	if !strings.EqualFold(admUser.Password, "") {
-		set += " password = '" + admUser.Password + "',"
-	}
-	if !strings.EqualFold(admUser.Account, "") {
-		set += " account = '" + admUser.Account + "',"
-	}
-	if !strings.EqualFold(admUser.Mail, "") {
-		set += " mail = '" + admUser.Mail + "',"
-	}
-	if !strings.EqualFold(admUser.Name, "") {
-		set += " name = '" + admUser.Name + "',"
-	}
-	if !strings.EqualFold(admUser.Phone, "") {
-		set += " phone = '" + admUser.Phone + "',"
-	}
-	if !strings.EqualFold(admUser.Department, "") {
-		set += " department = '" + admUser.Department + "',"
-	}
-	set += " updatetime = '" + time.Now().Format("2006-01-02 15:04:05") + "'"
-
-	return set
 }
 
 /**
 删除管理员基本信息
 */
 func (this *admUserService) Delete(userids string) error {
-	delUserSql := "update t_admuser set isdel = 0 where id in (" + userids + ")"
-	if _, err := o.Raw(delUserSql).Exec(); err != nil {
+	ids := strings.Split(userids, ",")
+	if _, err := o.In("id", ids).Delete(new(model.Admuser)); err != nil {
 		return &common.BizError{"删除管理员基本信息失败"}
 	}
-	delRelSql := "update t_user_group_rel set isdel = 0 where userid in (" + userids + ")"
-	if _, err := o.Raw(delRelSql).Exec(); err != nil {
+	if _, err := o.In("groupid", ids).Delete(new(model.UserGroupRel)); err != nil {
 		return &common.BizError{"删除管理员和组关系失败"}
 	}
+
 	return nil
 }
 
@@ -179,13 +168,15 @@ func (this *admUserService) Delete(userids string) error {
 登陆鉴权
 */
 func (this *admUserService) Authentication(account, encodePwd string) (admuser *model.Admuser, err error) {
-	selectSql := "select id,password from t_admuser t where t.account = '" + account + "' and isdel =1"
-	if err := o.Raw(selectSql).QueryRow(&admuser); err != nil {
-		if err == orm.ErrNoRows {
+	admuser = &model.Admuser{}
+	if _, err := o.Table(new(model.Admuser)).Cols("id", "password").Where("account = ?", account).Get(admuser); err != nil {
+		if err == xorm.ErrNotExist {
 			return nil, &common.BizError{"账号不存在"}
 		}
+		beego.Info(err)
 		return nil, &common.BizError{"登陆失败，请稍后重试"}
 	}
+
 	if subtle.ConstantTimeCompare([]byte(encodePwd), []byte(admuser.Password)) != 1 {
 		return nil, &common.BizError{"密码错误"}
 	}
@@ -196,9 +187,10 @@ func (this *admUserService) Authentication(account, encodePwd string) (admuser *
 根据ID查询管理员
 */
 func (this *admUserService) GetUserById(id int64) (admuser *model.Admuser, err error) {
-	admuser = &model.Admuser{Id: id}
-	if err := o.Read(admuser); err != nil {
-		if err == orm.ErrNoRows {
+
+	admuser = &model.Admuser{}
+	if _, err := o.Id(id).Get(admuser); err != nil {
+		if err == xorm.ErrNotExist {
 			err = &common.BizError{"账号不存在"}
 			return nil, err
 		}
@@ -209,16 +201,15 @@ func (this *admUserService) GetUserById(id int64) (admuser *model.Admuser, err e
 }
 
 func (this *admUserService) GetAllCheckGroup(id int64) map[int64]bool {
-	var list orm.ParamsList
-	num, err := o.Raw("SELECT groupid from t_user_group_rel t where isdel=1 and t.userid = ?", id).ValuesFlat(&list)
-	if err != nil || num < 1 {
+
+	list := []model.UserGroupRel{}
+	if err := o.Where("userid = ?", id).Find(&list); err != nil {
 		return nil
 	}
 	roleIdMap := make(map[int64]bool, len(list))
 	for i := 0; i < len(list); i++ {
-		idStr := list[i].(string)
-		id, _ := strconv.ParseInt(idStr, 10, 64)
-		roleIdMap[id] = true
+		roleIdMap[list[i].Groupid] = true
 	}
 	return roleIdMap
+
 }

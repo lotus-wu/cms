@@ -23,4 +23,5 @@ func page_not_found(rw http.ResponseWriter, r *http.Request) {
 
 func page_note_permission(rw http.ResponseWriter, r *http.Request) {
 	rw.Write([]byte("401 permission denied"))
+
 }

@@ -4,7 +4,6 @@ import (
 	"cms/src/common"
 	"cms/src/model"
 	"cms/src/service"
-	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
@@ -88,9 +87,6 @@ func (this *AdmUserController) Add() {
 	user.Password = common.EncodeMessageSHA256(user.Password)
 
 	admuser := &user
-	admuser.Createtime = time.Now()
-	admuser.Updatetime = time.Now()
-	admuser.Isdel = 1
 
 	if err := service.AdmUserService.Add(admuser, groupIds); err != nil {
 		this.jsonResult(err.Error())
@@ -155,9 +151,6 @@ func (this *AdmUserController) Modify() {
 
 	admuser := &user
 	admuser.Id = userId
-	admuser.Createtime = time.Now()
-	admuser.Updatetime = time.Now()
-	admuser.Isdel = 1
 
 	if err := service.AdmUserService.Modify(admuser, groupIds); err != nil {
 		this.jsonResult(err.Error())
@@ -194,13 +187,11 @@ func (this *AdmUserController) Gridgrouplist() {
 
 	for index, admuser := range admuserGroup {
 		admUserCheck := model.Admusergroupcheck{
-			Id:         admuser.Id,
-			Groupname:  admuser.Groupname,
-			Des:        admuser.Des,
-			Createtime: admuser.Createtime,
-			Updatetime: admuser.Updatetime,
-			Isdel:      admuser.Isdel,
-			Check:      checkedGroupId[admuser.Id]}
+			Id:        admuser.Id,
+			Groupname: admuser.Groupname,
+			Des:       admuser.Des,
+
+			Check: checkedGroupId[admuser.Id]}
 		admUserCheckGroup[index] = admUserCheck
 	}
 

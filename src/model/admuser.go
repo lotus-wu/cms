@@ -4,13 +4,13 @@ import "time"
 
 type Admuser struct {
 	Id         int64     `json:"id"`
-	Account    string    `json:"account",orm:"unique"`
+	Account    string    `json:"account" xorm:"unique"`
 	Mail       string    `json:"mail"`
 	Name       string    `json:"name"`
 	Phone      string    `json:"phone"`
 	Department string    `json:"department"`
 	Password   string    `json:"password"`
-	Createtime time.Time `json:"createtime",orm:"auto_now_add;type(datetime)"`
-	Updatetime time.Time `json:"updatetime",orm:"auto_now;type(datetime)"` // 更新时间
-	Isdel      int8      `json:"isdel",orm:"default(1)"`
+	CreatedAt  time.Time `json:"createtime" xorm:"created"`
+	UpdatedAt  time.Time `json:"updatetime" xorm:"updated"` // 更新时间
+	DeletedAt  time.Time `json:"-"  xorm:"deleted"`
 }

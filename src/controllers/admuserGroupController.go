@@ -4,7 +4,6 @@ import (
 	"cms/src/common"
 	"cms/src/model"
 	"cms/src/service"
-	"time"
 
 	"github.com/astaxie/beego/validation"
 )
@@ -65,11 +64,9 @@ func (this *AdmUserGroupController) Add() {
 	}
 
 	admusergroup := &model.Admusergroup{
-		Groupname:  groupname,
-		Des:        describe,
-		Createtime: time.Now(),
-		Updatetime: time.Now(),
-		Isdel:      1}
+		Groupname: groupname,
+		Des:       describe,
+	}
 	if err := service.AdmUserGroupService.AddAdmUserGroup(admusergroup, ids); err != nil {
 		this.jsonResult(err.Error())
 	}
@@ -112,12 +109,10 @@ func (this *AdmUserGroupController) Modify() {
 	}
 
 	admusergroup := &model.Admusergroup{
-		Id:         id,
-		Groupname:  groupname,
-		Des:        describe,
-		Createtime: time.Now(),
-		Updatetime: time.Now(),
-		Isdel:      1}
+		Id:        id,
+		Groupname: groupname,
+		Des:       describe,
+	}
 	if err := service.AdmUserGroupService.Modifyadmusergroup(admusergroup, ids); err != nil {
 		this.jsonResult(err.Error())
 	}

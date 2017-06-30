@@ -1,14 +1,12 @@
 package service
 
 import (
-	"bytes"
 	"cms/src/common"
 	"cms/src/model"
-	"strconv"
+
 	"strings"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 )
 
 type roleService struct{}
@@ -28,32 +26,53 @@ func (this *roleService) AddRole(role *model.Role) error {
 */
 func (this *roleService) Gridlist(pager *common.Pager, roleid int, roleName, roleUrl string) (int, []model.Role) {
 	//查询总数
-	contsql := "SELECT count(1) from t_role t where t.pid = ?"
+	var err error
+	var count int64
 	condition := genCondition(roleName, roleUrl)
-	var count int
-	err := o.Raw(contsql+condition, roleid).QueryRow(&count)
-	if err != nil {
+	if count, err = o.Alias("t").Where(condition, roleid).Count(new(model.Role)); err != nil {
 		beego.Error("查询Pid为", roleid, "的role总数异常，error message：", err.Error())
+		return 0, nil
 	}
 	beego.Debug("pid 为", roleid, "的role有", count, "个")
-
 	if count < 1 {
 		beego.Info("没有pid 为", roleid, "的role")
 		return 0, nil
 	}
 
-	// 从数据库查询数据
-	var roles []model.Role
-	listsql := "SELECT id, pid, name, roleurl, module, action, ismenu, des from t_role t where t.pid = ?  "
-	_, err = o.Raw(listsql+condition+common.LIMIT, roleid, pager.GetBegin(), pager.GetLen()).QueryRows(&roles)
-	if err != nil {
-		beego.Error("查询Pid为", roleid, "的role列表异常，error message：", err.Error())
+	datas := []model.Role{} //多个数据
+	if err := o.Alias("t").Where(condition, roleid).Limit(pager.GetLen(), pager.GetBegin()).Find(&datas); err != nil {
+		beego.Warn("find admin User failed:", err.Error())
+		return 0, nil
 	}
 
-	return count, roles
+	return int(count), datas
+	//	contsql := "SELECT count(1) from t_role t where t.pid = ?"
+	//	condition := genCondition(roleName, roleUrl)
+	//	var count int
+	//	err := o.Raw(contsql+condition, roleid).QueryRow(&count)
+	//	if err != nil {
+	//		beego.Error("查询Pid为", roleid, "的role总数异常，error message：", err.Error())
+	//	}
+	//	beego.Debug("pid 为", roleid, "的role有", count, "个")
+
+	//	if count < 1 {
+	//		beego.Info("没有pid 为", roleid, "的role")
+	//		return 0, nil
+	//	}
+
+	//	// 从数据库查询数据
+	//	var roles []model.Role
+	//	listsql := "SELECT id, pid, name, roleurl, module, action, ismenu, des from t_role t where t.pid = ?  "
+	//	_, err = o.Raw(listsql+condition+common.LIMIT, roleid, pager.GetBegin(), pager.GetLen()).QueryRows(&roles)
+	//	if err != nil {
+	//		beego.Error("查询Pid为", roleid, "的role列表异常，error message：", err.Error())
+	//	}
+
+	//return count, roles
 }
 
 func genCondition(roleName, roleUrl string) (condition string) {
+	condition = " t.pid = ?"
 	if !strings.EqualFold(roleName, "") {
 		condition += " and t.name = '" + roleName + "'"
 	}
@@ -68,27 +87,58 @@ func genCondition(roleName, roleUrl string) (condition string) {
 @param needRoot:查询的数据集中是否需要包含root节点
 */
 func (this *roleService) Listtree(needRoot bool) []model.RoleTree {
-	var buf bytes.Buffer
-	buf.WriteString("SELECT id, pid, name, roleurl, ismenu, des from t_role t ")
+
+	var roles []model.Role
 	if !needRoot {
-		buf.WriteString(" where t.id != 0")
-	}
-	var roles []model.RoleTree
-	beego.Debug("查询权限树sql：", buf.String())
-	_, err := o.Raw(buf.String()).QueryRows(&roles)
-	if err != nil {
-		beego.Error("查询权限树的role列表异常，error message：", err.Error())
+		err := o.Find(&roles)
+		if err != nil {
+			beego.Error("查询权限树的role列表异常，error message：", err.Error())
+			return nil
+		}
+	} else {
+
+		err := o.Alias("t").Where("t.id != 0").Find(&roles)
+		if err != nil {
+			beego.Error("查询权限树的role列表异常，error message：", err.Error())
+			return nil
+		}
 	}
 	beego.Debug("生成权限树的数据：", roles)
-	return roles
+	rolesTree := []model.RoleTree{}
+	for i := 0; i < len(roles); i++ {
+		tmp := model.RoleTree{
+			Id:      roles[i].Id,
+			Pid:     roles[i].Pid,
+			Name:    roles[i].Name,
+			Roleurl: roles[i].Roleurl,
+		}
+		rolesTree = append(rolesTree, tmp)
+	}
+	beego.Info("********************")
+	beego.Info(rolesTree)
+
+	return rolesTree
+	//	var buf bytes.Buffer
+	//	buf.WriteString("SELECT id, pid, name, roleurl, ismenu, des from t_role t ")
+	//	if !needRoot {
+	//		buf.WriteString(" where t.id != 0")
+	//	}
+	//	var roles []model.RoleTree
+	//	beego.Debug("查询权限树sql：", buf.String())
+	//	_, err := o.Raw(buf.String()).QueryRows(&roles)
+	//	if err != nil {
+	//		beego.Error("查询权限树的role列表异常，error message：", err.Error())
+	//	}
+	//	beego.Debug("生成权限树的数据：", roles)
+	//	return roles
 }
 
 /**
 根据ID查询role
 */
 func (this *roleService) GetRoleById(id int64) (model.Role, error) {
-	role := model.Role{Id: id}
-	if err := o.Read(&role); err != nil {
+	role := model.Role{}
+	if _, err := o.Id(id).Get(&role); err != nil {
 		return model.Role{}, err
 	}
 	return role, nil
@@ -98,13 +148,13 @@ func (this *roleService) GetRoleById(id int64) (model.Role, error) {
 修改权限
 */
 func (this *roleService) ModifyRole(r *model.Role) error {
-	role := model.Role{Id: r.Id}
+	role := model.Role{}
 	//根据ID读取
-	if err := o.Read(&role); err != nil {
+	if _, err := o.Id(r.Id).Get(&role); err != nil {
 		return err
 	}
 	//修改
-	if num, err := o.Update(r); num <= 0 && err != nil {
+	if num, err := o.Id(r.Id).Update(r); num <= 0 && err != nil {
 		return err
 	}
 	return nil
@@ -114,20 +164,28 @@ func (this *roleService) ModifyRole(r *model.Role) error {
 删除权限
 */
 func (this *roleService) DeleteRole(ids []string) error {
-	idstr := strings.Join(ids, ",")
-
-	var count int
-	countSubRoleSql := "select count(1) from t_role where pid in (" + idstr + ")"
-	o.Raw(countSubRoleSql).QueryRow(&count)
-	if count > 0 {
+	countSubRoleSql, err := o.In("pid", ids).Count(new(model.Role))
+	if err != nil || countSubRoleSql > 0 {
 		return &common.BizError{"不能删除有子节点的权限，请先删除所有子节点！"}
 	}
-
-	sql := "DELETE from t_role  where id in (" + idstr + ")"
-	if _, err := o.Raw(sql).Exec(); err != nil {
+	if _, err := o.In("id", ids).Delete(new(model.Role)); err != nil {
 		return &common.BizError{"删除失败！"}
 	}
 	return nil
+	//	idstr := strings.Join(ids, ",")
+
+	//	var count int
+	//	countSubRoleSql := "select count(1) from t_role where pid in (" + idstr + ")"
+	//	o.Raw(countSubRoleSql).QueryRow(&count)
+	//	if count > 0 {
+	//		return &common.BizError{"不能删除有子节点的权限，请先删除所有子节点！"}
+	//	}
+
+	//	sql := "DELETE from t_role  where id in (" + idstr + ")"
+	//	if _, err := o.Raw(sql).Exec(); err != nil {
+	//		return &common.BizError{"删除失败！"}
+	//	}
+	//	return nil
 }
 
 /**
@@ -138,12 +196,29 @@ func (this *roleService) ValidateRole(controllerName, actionName string, id int6
 		beego.Debug("用户属于超级管理员，不用校验权限")
 		return nil
 	}
-	selectSql := "SELECT COUNT(1) FROM t_user_group_rel ur,t_role r ,t_group_role_rel gr where r.module = ? and r.action = ? and ur.userid = ? and ur.groupid = gr.groupid and r.id = gr.roleid and ur.isdel = 1 and gr.isdel = 1"
-	var count int
-	o.Raw(selectSql, controllerName, actionName, id).QueryRow(&count)
-	if count > 0 {
-		return nil
+	selectSql := "SELECT COUNT(1) FROM t_user_group_rel ur,t_role r ,t_group_role_rel gr where r.module = ? and r.action = ? and ur.userid = ? and ur.groupid = gr.groupid and r.id = gr.roleid "
+
+	result, _ := o.Query(selectSql, controllerName, actionName, id)
+	beego.Warn("****!!!!!!!!!!!!!!!", result)
+	if len(result) > 0 {
+		data := result[0]["COUNT(1)"][0]
+		beego.Info(data)
+		if data > 0 {
+			return nil
+		}
+		//return nil
 	}
+	//	if err == nil {
+	//		return nil
+	//	}
+
+	//beego.Warn(err.Error())
+	//	selectSql := "SELECT COUNT(1) FROM t_user_group_rel ur,t_role r ,t_group_role_rel gr where r.module = ? and r.action = ? and ur.userid = ? and ur.groupid = gr.groupid and r.id = gr.roleid and ur.isdel = 1 and gr.isdel = 1"
+	//	var count int
+	//	o.Raw(selectSql, controllerName, actionName, id).QueryRow(&count)
+	//	if count > 0 {
+	//		return nil
+	//	}
 	return &common.BizError{"您没有权限执行此操作，请联系系统管理员。"}
 }
 
@@ -154,17 +229,36 @@ func (this *roleService) LoadMenu(id int64) []model.RoleTree {
 
 	var roles []model.RoleTree
 	if this.isAdministrator(id) {
-		selectSql := "SELECT t.id, pid, name, roleurl , ismenu, des from t_role t where t.id != 0 and t.ismenu = 0"
-		if _, err := o.Raw(selectSql).QueryRows(&roles); err != nil {
+		role := []model.Role{}
+		if err := o.Alias("t").Where("t.id != 0 and t.ismenu = 0").Find(&role); err != nil {
 			beego.Error("查询权限树的role列表异常，error message：", err.Error())
 			return roles
 		}
+		for i := 0; i < len(role); i++ {
+			tmp := model.RoleTree{
+				Id:      role[i].Id,
+				Pid:     role[i].Pid,
+				Name:    role[i].Name,
+				Roleurl: role[i].Roleurl,
+			}
+			roles = append(roles, tmp)
+		}
+		//		selectSql := "SELECT t.id, pid, name, roleurl , ismenu, des from t_role t where t.id != 0 and t.ismenu = 0"
+		//		if _, err := o.Raw(selectSql).QueryRows(&roles); err != nil {
+		//			beego.Error("查询权限树的role列表异常，error message：", err.Error())
+		//			return roles
+		//		}
 	} else {
-		selectSql := "SELECT DISTINCT t.id, pid, name, roleurl , ismenu, des from t_role t,t_user_group_rel ug,t_group_role_rel gr where t.id != 0 and t.ismenu = 0 and t.id = gr.roleid and ug.userid=? and ug.groupid = gr.groupid and ug.isdel=1 and gr.isdel =1"
-		if _, err := o.Raw(selectSql, id).QueryRows(&roles); err != nil {
+		selectSql := "SELECT DISTINCT t.id, pid, name, roleurl  from t_role t,t_user_group_rel ug,t_group_role_rel gr where t.id != 0 and t.ismenu = 0 and t.id = gr.roleid and ug.userid=? and ug.groupid = gr.groupid "
+		if err := o.Sql(selectSql, id).Find(&roles); err != nil {
 			beego.Error("查询权限树的role列表异常，error message：", err.Error())
 			return roles
 		}
+		//		selectSql := "SELECT DISTINCT t.id, pid, name, roleurl , ismenu, des from t_role t,t_user_group_rel ug,t_group_role_rel gr where t.id != 0 and t.ismenu = 0 and t.id = gr.roleid and ug.userid=? and ug.groupid = gr.groupid and ug.isdel=1 and gr.isdel =1"
+		//		if _, err := o.Raw(selectSql, id).QueryRows(&roles); err != nil {
+		//			beego.Error("查询权限树的role列表异常，error message：", err.Error())
+		//			return roles
+		//		}
 	}
 
 	pidMap := make(map[int64]bool, 10)
@@ -191,20 +285,30 @@ func (this *roleService) LoadMenu(id int64) []model.RoleTree {
 判断当前用户是否属于 超级管理员
 */
 func (this *roleService) isAdministrator(id int64) bool {
-
 	flag := false
-	var list orm.ParamsList
-	num, err := o.Raw("SELECT groupid from t_user_group_rel t where t.userid = ? and t.isdel =1", id).ValuesFlat(&list)
-	if err != nil || num < 1 {
+	datas := []model.UserGroupRel{}
+	if err := o.Alias("t").Where("t.userid = ?", id).Find(&datas); err != nil {
 		return flag
 	}
-	for i := 0; i < len(list); i++ {
-		groupId := list[i].(string)
-		if id, err := strconv.ParseInt(groupId, 10, 64); err == nil {
-			if id == 1 {
-				return true
-			}
+	for i := 0; i < len(datas); i++ {
+		if datas[i].Groupid == 1 {
+			return true
 		}
 	}
-	return flag
+	return false
+	//	flag := false
+	//	var list orm.ParamsList
+	//	num, err := o.Raw("SELECT groupid from t_user_group_rel t where t.userid = ? and t.isdel =1", id).ValuesFlat(&list)
+	//	if err != nil || num < 1 {
+	//		return flag
+	//	}
+	//	for i := 0; i < len(list); i++ {
+	//		groupId := list[i].(string)
+	//		if id, err := strconv.ParseInt(groupId, 10, 64); err == nil {
+	//			if id == 1 {
+	//				return true
+	//			}
+	//		}
+	//	}
+	//	return flag
 }

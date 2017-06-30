@@ -111,12 +111,12 @@ func validateToken(token, currentIp string) *model.Admuser {
 		return nil
 	}
 	userid := array[0]
-	ip := array[2]
-	if !strings.EqualFold(ip, currentIp) {
-		//IP发生变化 强制重新登录
-		beego.Debug("ip chenged")
-		return nil
-	}
+	//ip := array[2]
+	//	if !strings.EqualFold(ip, currentIp) {
+	//		//IP发生变化 强制重新登录
+	//		beego.Debug("ip chenged")
+	//		return nil
+	//	}
 	intid, _ := strconv.ParseInt(userid, 10, 64)
 	admuser, err := service.AdmUserService.GetUserById(intid)
 	if err != nil || admuser.Id < 0 {

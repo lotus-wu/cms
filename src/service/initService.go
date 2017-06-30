@@ -4,12 +4,13 @@ import (
 	"cms/src/model"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/core"
+	"github.com/go-xorm/xorm"
 )
 
 var (
-	o           orm.Ormer
+	o           *xorm.Engine
 	tablePrefix string // 表前缀
 
 	RoleService         *roleService
@@ -20,26 +21,31 @@ var (
 func init() {
 	beego.Info("init orm start...")
 	tablePrefix = beego.AppConfig.String("db.prefix")
+	var err error
 
-	dbType := beego.AppConfig.String("db_type")
 	dsn := generateDSN()
-	orm.RegisterDataBase("default", dbType, dsn)
+	o, err = xorm.NewEngine("mysql", dsn)
+	if err != nil {
+		beego.Error("open db failed ", err)
+	}
+	tbMapper := core.NewPrefixMapper(core.SnakeMapper{}, "t_")
+	o.SetTableMapper(tbMapper)
 
-	orm.RegisterModelWithPrefix(tablePrefix,
-		new(model.Role),
+	beego.Info("init orm engine ,err", o, err)
+	err = o.Sync2(new(model.Admuser),
 		new(model.Admusergroup),
+		new(model.Admusergroupcheck),
 		new(model.GroupRoleRel),
-		new(model.Admuser),
-		new(model.UserGroupRel),
-	)
-	orm.RunSyncdb("default", false, true)
-
-	if beego.AppConfig.String("runmode") == "dev" {
-		orm.Debug = true
+		new(model.Role),
+		new(model.RoleTree),
+		new(model.UserGroupRel))
+	if err != nil {
+		beego.Error("db sync error ", err)
 	}
 
-	o = orm.NewOrm()
-	orm.RunCommand()
+	if beego.AppConfig.String("runmode") == "dev" {
+		o.ShowSQL(true)
+	}
 
 	beego.Info("init orm end.")
 	//初始化service
