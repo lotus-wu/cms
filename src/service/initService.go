@@ -59,7 +59,6 @@ func generateDSN() string {
 	dbPassword := beego.AppConfig.String("db_pass")
 	dbName := beego.AppConfig.String("db_name")
 
-	//beego.Debug(dbHost, dbPort, dbUser, dbPassword, dbName, dbType)
 	// root:@tcp(127.0.0.1:3306)/test?charset=utf8
 	dsn := dbUser + ":" + dbPassword + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8"
 	return dsn

@@ -208,17 +208,7 @@ func (this *roleService) ValidateRole(controllerName, actionName string, id int6
 		}
 		//return nil
 	}
-	//	if err == nil {
-	//		return nil
-	//	}
 
-	//beego.Warn(err.Error())
-	//	selectSql := "SELECT COUNT(1) FROM t_user_group_rel ur,t_role r ,t_group_role_rel gr where r.module = ? and r.action = ? and ur.userid = ? and ur.groupid = gr.groupid and r.id = gr.roleid and ur.isdel = 1 and gr.isdel = 1"
-	//	var count int
-	//	o.Raw(selectSql, controllerName, actionName, id).QueryRow(&count)
-	//	if count > 0 {
-	//		return nil
-	//	}
 	return &common.BizError{"您没有权限执行此操作，请联系系统管理员。"}
 }
 
@@ -243,22 +233,14 @@ func (this *roleService) LoadMenu(id int64) []model.RoleTree {
 			}
 			roles = append(roles, tmp)
 		}
-		//		selectSql := "SELECT t.id, pid, name, roleurl , ismenu, des from t_role t where t.id != 0 and t.ismenu = 0"
-		//		if _, err := o.Raw(selectSql).QueryRows(&roles); err != nil {
-		//			beego.Error("查询权限树的role列表异常，error message：", err.Error())
-		//			return roles
-		//		}
+
 	} else {
 		selectSql := "SELECT DISTINCT t.id, pid, name, roleurl  from t_role t,t_user_group_rel ug,t_group_role_rel gr where t.id != 0 and t.ismenu = 0 and t.id = gr.roleid and ug.userid=? and ug.groupid = gr.groupid "
 		if err := o.Sql(selectSql, id).Find(&roles); err != nil {
 			beego.Error("查询权限树的role列表异常，error message：", err.Error())
 			return roles
 		}
-		//		selectSql := "SELECT DISTINCT t.id, pid, name, roleurl , ismenu, des from t_role t,t_user_group_rel ug,t_group_role_rel gr where t.id != 0 and t.ismenu = 0 and t.id = gr.roleid and ug.userid=? and ug.groupid = gr.groupid and ug.isdel=1 and gr.isdel =1"
-		//		if _, err := o.Raw(selectSql, id).QueryRows(&roles); err != nil {
-		//			beego.Error("查询权限树的role列表异常，error message：", err.Error())
-		//			return roles
-		//		}
+
 	}
 
 	pidMap := make(map[int64]bool, 10)
@@ -296,19 +278,5 @@ func (this *roleService) isAdministrator(id int64) bool {
 		}
 	}
 	return false
-	//	flag := false
-	//	var list orm.ParamsList
-	//	num, err := o.Raw("SELECT groupid from t_user_group_rel t where t.userid = ? and t.isdel =1", id).ValuesFlat(&list)
-	//	if err != nil || num < 1 {
-	//		return flag
-	//	}
-	//	for i := 0; i < len(list); i++ {
-	//		groupId := list[i].(string)
-	//		if id, err := strconv.ParseInt(groupId, 10, 64); err == nil {
-	//			if id == 1 {
-	//				return true
-	//			}
-	//		}
-	//	}
-	//	return flag
+
 }

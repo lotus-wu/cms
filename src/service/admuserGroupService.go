@@ -92,12 +92,6 @@ func (this *admUserGroupService) Modifyadmusergroup(admusergroup *model.Admuserg
 		return &common.BizError{"修改失败"}
 	}
 
-	//	delsql := "update t_group_role_rel t set t.isdel = 0 where t.groupid = ? and t.isdel =1"
-	//	if _, err := o.Raw(delsql, id).Exec(); err != nil {
-	//		beego.Warn("del group's role fail.", err.Error())
-	//		return &common.BizError{"修改失败"}
-	//	}
-
 	//重新添加权限
 	flag := false
 	idArray := strings.Split(ids, ",")
@@ -134,23 +128,13 @@ func (this *admUserGroupService) Delete(ids string) error {
 		beego.Warn("delete fail id:", ids, err.Error())
 		return &common.BizError{"删除失败"}
 	}
-	//	delsql := "update t_admusergroup t set t.isdel = 0 where t.id in (" + ids + ")"
-	//	if _, err := o.Raw(delsql).Exec(); err != nil {
-	//		beego.Warn("delete fail id:", ids, err.Error())
-	//		return &common.BizError{"删除失败"}
-	//	}
 
+	//删除当前组关联的所有权限
 	if _, err := o.In("groupid", idss).Delete(new(model.GroupRoleRel)); err != nil {
 		beego.Warn("del group's role fail.", err.Error())
 		return &common.BizError{"删除失败"}
 	}
 
-	//删除当前组关联的所有权限
-	//	delrolesql := "update t_group_role_rel t set t.isdel = 0 where t.groupid in (" + ids + ") and t.isdel =1"
-	//	if _, err := o.Raw(delrolesql).Exec(); err != nil {
-	//		beego.Warn("del group's role fail.", err.Error())
-	//		return &common.BizError{"删除失败"}
-	//	}
 	return nil
 }
 
@@ -179,16 +163,4 @@ func (this *admUserGroupService) GetAllRoleByGroupId(id int64) map[int64]bool {
 		roleIdMap[list[i].Roleid] = true
 	}
 	return roleIdMap
-	//	var list orm.ParamsList
-	//	num, err := o.Raw("SELECT roleid from t_group_role_rel t where t.groupid = ? and t.isdel =1", id).ValuesFlat(&list)
-	//	if err != nil || num < 1 {
-	//		return nil
-	//	}
-	//	roleIdMap := make(map[int64]bool, len(list))
-	//	for i := 0; i < len(list); i++ {
-	//		idStr := list[i].(string)
-	//		id, _ := strconv.ParseInt(idStr, 10, 64)
-	//		roleIdMap[id] = true
-	//	}
-	//	return roleIdMap
 }
