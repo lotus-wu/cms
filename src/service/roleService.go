@@ -46,29 +46,7 @@ func (this *roleService) Gridlist(pager *common.Pager, roleid int, roleName, rol
 	}
 
 	return int(count), datas
-	//	contsql := "SELECT count(1) from t_role t where t.pid = ?"
-	//	condition := genCondition(roleName, roleUrl)
-	//	var count int
-	//	err := o.Raw(contsql+condition, roleid).QueryRow(&count)
-	//	if err != nil {
-	//		beego.Error("查询Pid为", roleid, "的role总数异常，error message：", err.Error())
-	//	}
-	//	beego.Debug("pid 为", roleid, "的role有", count, "个")
 
-	//	if count < 1 {
-	//		beego.Info("没有pid 为", roleid, "的role")
-	//		return 0, nil
-	//	}
-
-	//	// 从数据库查询数据
-	//	var roles []model.Role
-	//	listsql := "SELECT id, pid, name, roleurl, module, action, ismenu, des from t_role t where t.pid = ?  "
-	//	_, err = o.Raw(listsql+condition+common.LIMIT, roleid, pager.GetBegin(), pager.GetLen()).QueryRows(&roles)
-	//	if err != nil {
-	//		beego.Error("查询Pid为", roleid, "的role列表异常，error message：", err.Error())
-	//	}
-
-	//return count, roles
 }
 
 func genCondition(roleName, roleUrl string) (condition string) {
@@ -118,19 +96,6 @@ func (this *roleService) Listtree(needRoot bool) []model.RoleTree {
 	beego.Info(rolesTree)
 
 	return rolesTree
-	//	var buf bytes.Buffer
-	//	buf.WriteString("SELECT id, pid, name, roleurl, ismenu, des from t_role t ")
-	//	if !needRoot {
-	//		buf.WriteString(" where t.id != 0")
-	//	}
-	//	var roles []model.RoleTree
-	//	beego.Debug("查询权限树sql：", buf.String())
-	//	_, err := o.Raw(buf.String()).QueryRows(&roles)
-	//	if err != nil {
-	//		beego.Error("查询权限树的role列表异常，error message：", err.Error())
-	//	}
-	//	beego.Debug("生成权限树的数据：", roles)
-	//	return roles
 }
 
 /**
@@ -172,20 +137,7 @@ func (this *roleService) DeleteRole(ids []string) error {
 		return &common.BizError{"删除失败！"}
 	}
 	return nil
-	//	idstr := strings.Join(ids, ",")
 
-	//	var count int
-	//	countSubRoleSql := "select count(1) from t_role where pid in (" + idstr + ")"
-	//	o.Raw(countSubRoleSql).QueryRow(&count)
-	//	if count > 0 {
-	//		return &common.BizError{"不能删除有子节点的权限，请先删除所有子节点！"}
-	//	}
-
-	//	sql := "DELETE from t_role  where id in (" + idstr + ")"
-	//	if _, err := o.Raw(sql).Exec(); err != nil {
-	//		return &common.BizError{"删除失败！"}
-	//	}
-	//	return nil
 }
 
 /**
