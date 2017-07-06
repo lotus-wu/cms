@@ -148,17 +148,12 @@ func (this *roleService) ValidateRole(controllerName, actionName string, id int6
 		beego.Debug("用户属于超级管理员，不用校验权限")
 		return nil
 	}
-	selectSql := "SELECT COUNT(1) FROM t_user_group_rel ur,t_role r ,t_group_role_rel gr where r.module = ? and r.action = ? and ur.userid = ? and ur.groupid = gr.groupid and r.id = gr.roleid "
+	selectSql := "SELECT COUNT(1) FROM t_user_group_rel ur,t_role r ,t_group_role_rel gr where r.module = ? and r.action = ? and ur.userid = ? and ur.groupid = gr.groupid and r.id = gr.roleid and ur.deleted_at IS NULL and gr.deleted_at IS NULL"
+	count, _ := o.Sql(selectSql, controllerName, actionName, id).Count(nil)
+	beego.Warn(count)
 
-	result, _ := o.Query(selectSql, controllerName, actionName, id)
-	beego.Warn("****!!!!!!!!!!!!!!!", result)
-	if len(result) > 0 {
-		data := result[0]["COUNT(1)"][0]
-		beego.Info(data)
-		if data > 0 {
-			return nil
-		}
-		//return nil
+	if count > 0 {
+		return nil
 	}
 
 	return &common.BizError{"您没有权限执行此操作，请联系系统管理员。"}
